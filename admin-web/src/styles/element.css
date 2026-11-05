@@ -1,0 +1,169 @@
+/* ============================================================
+   Element Plus 主题接入
+   目标：把默认的蓝紫调、大圆角、阴影感，压到「冷链台账」的视觉里
+   做法：只覆盖 CSS 变量 + 少量结构性类，不 fork 组件
+   ============================================================ */
+:root {
+  --el-color-primary: var(--xh-teal-600);
+  --el-color-primary-light-3: #348b73;
+  --el-color-primary-light-5: #5aa48f;
+  --el-color-primary-light-7: #9fc9bc;
+  --el-color-primary-light-8: #c2ddd3;
+  --el-color-primary-light-9: var(--xh-teal-50);
+  --el-color-primary-dark-2: var(--xh-teal-800);
+
+  --el-color-danger: var(--xh-cinnabar-600);
+  --el-color-danger-light-9: var(--xh-cinnabar-50);
+  --el-color-warning: var(--xh-amber-600);
+  --el-color-warning-light-9: var(--xh-amber-50);
+  --el-color-success: var(--xh-teal-500);
+  --el-color-info: var(--xh-ink-400);
+
+  --el-text-color-primary: var(--xh-ink-900);
+  --el-text-color-regular: var(--xh-ink-700);
+  --el-text-color-secondary: var(--xh-ink-400);
+  --el-text-color-placeholder: var(--xh-ink-300);
+
+  --el-border-color: var(--xh-line);
+  --el-border-color-light: var(--xh-line-soft);
+  --el-border-color-lighter: var(--xh-line-soft);
+  --el-border-color-hover: var(--xh-line-strong);
+
+  --el-bg-color: var(--xh-surface);
+  --el-bg-color-page: var(--xh-paper);
+  --el-bg-color-overlay: var(--xh-surface);
+  --el-fill-color-blank: var(--xh-surface);
+  --el-fill-color-light: var(--xh-surface-2);
+
+  --el-font-family: var(--xh-font-sans);
+  --el-font-size-base: var(--xh-text-base);
+
+  --el-border-radius-base: var(--xh-radius-sm);
+  --el-border-radius-small: var(--xh-radius-xs);
+  --el-border-radius-round: 999px;
+
+  --el-box-shadow-light: var(--xh-shadow-1);
+  --el-box-shadow: var(--xh-shadow-2);
+  --el-box-shadow-dark: var(--xh-shadow-3);
+
+  --el-transition-duration: var(--xh-dur-fast);
+
+  /* 表格：台账的骨架是线，不是斑马纹 */
+  --el-table-border-color: var(--xh-line);
+  --el-table-header-bg-color: var(--xh-surface-2);
+  --el-table-header-text-color: var(--xh-ink-700);
+  --el-table-row-hover-bg-color: var(--xh-teal-50);
+}
+
+/* —— 按钮：压成方形边缘，去掉悬浮位移 —— */
+.el-button {
+  font-weight: 500;
+  border-radius: var(--xh-radius-sm);
+}
+.el-button--primary {
+  --el-button-hover-bg-color: var(--xh-teal-500);
+  --el-button-hover-border-color: var(--xh-teal-500);
+}
+
+/* —— 输入类控件：细边框、聚焦时主色描边不发光 —— */
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper {
+  box-shadow: 0 0 0 1px var(--xh-line) inset;
+  border-radius: var(--xh-radius-sm);
+}
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px var(--xh-teal-600) inset;
+}
+
+/* —— 表格：表头用等宽小字标签感，行分隔线极细 —— */
+.el-table {
+  font-size: var(--xh-text-sm);
+}
+/* 行内操作按钮：Element 默认 12px 间距会把两个按钮挤到第二行，收到 8px */
+.el-table .cell .el-button + .el-button {
+  margin-left: var(--xh-2);
+}
+.el-table th.el-table__cell {
+  font-family: var(--xh-font-mono);
+  font-size: var(--xh-text-xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--xh-ink-500);
+  border-bottom: 1px solid var(--xh-line-strong) !important;
+}
+.el-table td.el-table__cell {
+  border-bottom: 1px solid var(--xh-line-soft) !important;
+}
+.el-table__inner-wrapper::before {
+  display: none;
+}
+
+/* —— 分页：紧一点，靠右 —— */
+.el-pagination {
+  --el-pagination-font-size: var(--xh-text-sm);
+  --el-pagination-button-bg-color: transparent;
+  font-family: var(--xh-font-mono);
+}
+
+/* —— 标签：方角，低饱和 —— */
+.el-tag {
+  border-radius: var(--xh-radius-xs);
+  font-family: var(--xh-font-mono);
+  font-size: var(--xh-text-xs);
+  letter-spacing: 0.02em;
+}
+
+/* —— 弹层：只用第三级阴影，圆角收敛 —— */
+.el-dialog,
+.el-drawer {
+  border-radius: var(--xh-radius);
+}
+.el-dialog__header {
+  margin-right: 0;
+  padding-bottom: var(--xh-4);
+  border-bottom: 1px solid var(--xh-line);
+}
+.el-dialog__title {
+  font-family: var(--xh-font-display);
+  font-weight: 600;
+  font-size: var(--xh-text-lg);
+  color: var(--xh-ink-900);
+}
+
+/* —— 表单：标签右对齐、必填星号用朱砂 —— */
+.el-form-item__label {
+  color: var(--xh-ink-500);
+  font-size: var(--xh-text-sm);
+}
+.el-form-item.is-required .el-form-item__label::before {
+  color: var(--xh-cinnabar-600);
+}
+
+/* —— 徽标：待处理数量用朱砂实心，不发光 —— */
+.el-badge__content {
+  font-family: var(--xh-font-mono);
+  border-radius: var(--xh-radius-xs);
+}
+
+/* —— 空状态：不要大面积灰块 —— */
+.el-empty__description p {
+  color: var(--xh-ink-300);
+  font-size: var(--xh-text-sm);
+}
+
+/* —— 消息提示：方角、细边框 —— */
+.el-message,
+.el-notification {
+  border-radius: var(--xh-radius-sm);
+  border: 1px solid var(--xh-line);
+  box-shadow: var(--xh-shadow-2);
+}
+
+/* —— 菜单：侧栏深色面内的选中态 —— */
+.el-menu {
+  border-right: 0 !important;
+  background-color: transparent;
+}

@@ -1,0 +1,25 @@
+{
+  "name": "xianhe-fresh-admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "鲜禾前置仓 · 管理端（Vue 3 + Vite + Element Plus + ECharts + Pinia）",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 9101 --strictPort",
+    "pack:nginx": "vite build && node scripts/pack-nginx.mjs"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "echarts": "^5.5.1",
+    "element-plus": "^2.9.1",
+    "pinia": "^2.3.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.0.7"
+  }
+}

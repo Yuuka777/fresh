@@ -1,0 +1,28 @@
+# 依赖与构建产物
+node_modules/
+dist/
+dist-ssr/
+
+# nginx 便携包的运行期与生成物（nginx.exe 与 conf 需要入库，站点文件由 pack:nginx 生成）
+nginx-1.20.2/html/xianhe/
+nginx-1.20.2/logs/*.log
+nginx-1.20.2/logs/*.pid
+nginx-1.20.2/temp/*
+
+# 本地环境与密钥（凭证一律不进仓库）
+.env.local
+.env.*.local
+*.local
+
+# 编辑器与系统
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.StaffMapper">
+
+    <!--
+      查询列清单，刻意不含 password（登录查询必须取密文，单独写全字段）
+    -->
+    <sql id="safeColumns">
+        id, name, username, phone, sex, id_number, status, create_time, update_time
+    </sql>
+
+    <!-- 登录用：需要密码密文 -->
+    <select id="getByUsername" resultType="Staff">
+        SELECT id, name, username, password, phone, sex, id_number, status, create_time, update_time
+        FROM staff
+        WHERE username = #{username}
+    </select>
+
+    <!-- 按 id 查询：不含密码 -->
+    <select id="getById" resultType="Staff">
+        SELECT
+        <include refid="safeColumns"/>
+        FROM staff
+        WHERE id = #{id}
+    </select>
+
+    <!-- 修改密码前取出密文做比对，仅此一处返回 password -->
+    <select id="selectPasswordById" resultType="java.lang.String">
+        SELECT password
+        FROM staff
+        WHERE id = #{id}
+    </select>
+
+    <!-- 分页查询：三个筛选条件都是模糊匹配，AND 关系；按创建时间倒序（契约 2.1.4） -->
+    <select id="pageQuery" resultType="Staff">
+        SELECT
+        <include refid="safeColumns"/>
+        FROM staff
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                AND phone LIKE CONCAT('%', #{phone}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 新增：主键回填给入参对象；create_time 等由 AutoFillAspect 填充 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO staff (name, username, password, phone, sex, id_number, status,
+                           create_time, update_time, create_user, update_user)
+        VALUES (#{name}, #{username}, #{password}, #{phone}, #{sex}, #{idNumber}, #{status},
+                #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    </insert>
+
+    <!--
+      动态更新：只写非空字段。编辑表单不提交 status，写死会把它刷成 null（该列 NOT NULL）
+    -->
+    <update id="update">
+        UPDATE staff
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="sex != null and sex != ''">sex = #{sex},</if>
+            <if test="idNumber != null and idNumber != ''">id_number = #{idNumber},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 修改密码：只动 password，更新时间与操作人仍由切面填充，保证任何写操作都留痕 -->
+    <update id="updatePassword">
+        UPDATE staff
+        SET password    = #{password},
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 启用 / 禁用账号 -->
+    <update id="updateStatus">
+        UPDATE staff
+        SET status      = #{status},
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 物理删除。业务校验（不能删自己、启用中不能删）在 Service 层完成 -->
+    <delete id="deleteById">
+        DELETE FROM staff
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

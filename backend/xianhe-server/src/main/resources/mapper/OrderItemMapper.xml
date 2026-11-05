@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.OrderItemMapper">
+
+    <!-- 前置条件：items 非空（Service 层已判定，避免拼出非法的 VALUES ()） -->
+    <insert id="insertBatch">
+        INSERT INTO order_item (name, image, order_id, goods_id, bundle_id, spec_text, number, amount)
+        VALUES
+        <foreach collection="items" item="it" separator=",">
+            (#{it.name}, #{it.image}, #{it.orderId}, #{it.goodsId}, #{it.bundleId},
+             #{it.specText}, #{it.number}, #{it.amount})
+        </foreach>
+    </insert>
+
+    <select id="listByOrderId" resultType="OrderItem">
+        SELECT id, name, image, order_id, goods_id, bundle_id, spec_text, number, amount
+        FROM order_item
+        WHERE order_id = #{orderId}
+        ORDER BY id ASC
+    </select>
+
+    <!-- 前置条件：orderIds 非空（Service 层已判定，避免拼出非法的 IN ()） -->
+    <select id="listByOrderIds" resultType="OrderItem">
+        SELECT id, name, image, order_id, goods_id, bundle_id, spec_text, number, amount
+        FROM order_item
+        WHERE order_id IN
+        <foreach collection="orderIds" item="orderId" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+        ORDER BY id ASC
+    </select>
+
+</mapper>

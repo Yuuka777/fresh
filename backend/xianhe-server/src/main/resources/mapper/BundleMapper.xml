@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.BundleMapper">
+
+    <sql id="columns">
+        id, category_id, name, price, status, description, image, storage_zone,
+        create_time, update_time, create_user, update_user
+    </sql>
+
+    <!-- 分类删除前的关联校验，同样不过滤 status -->
+    <select id="countByCategoryId" resultType="int">
+        SELECT COUNT(*)
+        FROM bundle
+        WHERE category_id = #{categoryId}
+    </select>
+
+    <select id="getById" resultType="Bundle">
+        SELECT
+        <include refid="columns"/>
+        FROM bundle
+        WHERE id = #{id}
+    </select>
+
+    <!-- 详情出参，LEFT JOIN 的理由同 GoodsMapper.getVoById -->
+    <select id="getVoById" resultType="BundleVO">
+        SELECT b.id,
+               b.name,
+               b.category_id,
+               c.name AS categoryName,
+               b.price,
+               b.image,
+               b.description,
+               b.status,
+               b.storage_zone,
+               b.update_time
+        FROM bundle b
+                 LEFT JOIN goods_category c ON c.id = b.category_id
+        WHERE b.id = #{id}
+    </select>
+
+    <!-- 分页查询（契约 2.7.2）：条件同商品；不查 bundle_goods -->
+    <select id="pageQuery" resultType="BundleVO">
+        SELECT b.id,
+               b.name,
+               b.category_id,
+               c.name AS categoryName,
+               b.price,
+               b.image,
+               b.description,
+               b.status,
+               b.storage_zone,
+               b.update_time
+        FROM bundle b
+                 LEFT JOIN goods_category c ON c.id = b.category_id
+        <where>
+            <if test="name != null and name != ''">
+                AND b.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="categoryId != null">
+                AND b.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                AND b.status = #{status}
+            </if>
+        </where>
+        ORDER BY b.update_time DESC
+    </select>
+
+    <!-- status = 1 即 StatusConstant.ENABLE（起售中），删除组合箱前的校验用 -->
+    <select id="countOnSaleByIds" resultType="int">
+        SELECT COUNT(*)
+        FROM bundle
+        WHERE status = 1
+        AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bundle (category_id, name, price, status, description, image, storage_zone,
+                            create_time, update_time, create_user, update_user)
+        VALUES (#{categoryId}, #{name}, #{price}, #{status}, #{description}, #{image}, #{storageZone},
+                #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    </insert>
+
+    <!--
+      动态更新：只写提交的字段。storage_zone 由 Service 重新推导，status 只能经状态接口变更
+    -->
+    <update id="update">
+        UPDATE bundle
+        <set>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="storageZone != null">storage_zone = #{storageZone},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE bundle
+        SET status      = #{status},
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByIds">
+        DELETE FROM bundle
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 按 id 批量查：购物车回查现值（用户端） -->
+    <select id="listByIds" resultType="Bundle">
+        SELECT
+        <include refid="columns"/>
+        FROM bundle
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- 用户端：只看起售组合箱，按 id 升序 -->
+    <select id="listOnSaleByCategoryId" resultType="Bundle">
+        SELECT
+        <include refid="columns"/>
+        FROM bundle
+        WHERE status = 1
+          AND category_id = #{categoryId}
+        ORDER BY id ASC
+    </select>
+
+    <!-- 工作台组合箱总览：起售 / 停售各有多少 -->
+    <select id="countByStatus" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM bundle
+        WHERE status = #{status}
+    </select>
+
+</mapper>

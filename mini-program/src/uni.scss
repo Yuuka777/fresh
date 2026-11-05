@@ -1,0 +1,71 @@
+/* ============================================================
+   鲜禾 · 小程序端设计令牌（uni.scss 会被注入到每个 scss 样式块）
+   方向：延续管理端的「冷链台账」，但按 C 端放大留白、抬高触控区
+   提醒：微信小程序无法加载外链中文字体，故排版差异靠字号/字距/色彩层级实现
+   ============================================================ */
+
+/* —— 主色：深青绿 —— */
+$xh-teal-900: #04342c;
+$xh-teal-800: #085041;
+$xh-teal-600: #0f6e56;
+$xh-teal-500: #1d9e75;
+$xh-teal-200: #9fe1cb;
+$xh-teal-50: #e1f5ee;
+
+/* —— 墨色（文字与深色面） —— */
+$xh-ink-900: #0a1f19;
+$xh-ink-700: #1d4237;
+$xh-ink-500: #4c6459;
+$xh-ink-400: #556a5f;
+$xh-ink-300: #627469;
+
+/* —— 纸面 —— */
+$xh-paper: #f4f6f2;
+$xh-surface: #ffffff;
+$xh-surface-2: #fafbf8;
+$xh-line: #dce4dd;
+$xh-line-soft: #e8ede8;
+
+/* —— 语义色（克制使用） —— */
+$xh-cinnabar-700: #8f2d1a;
+$xh-cinnabar-600: #b23a22;
+$xh-cinnabar-50: #fbede8;
+$xh-amber-700: #85500f;
+$xh-amber-50: #fbf0df;
+$xh-blue-600: #1f4e79;
+$xh-blue-50: #e9f0f7;
+
+/* —— 圆角：小程序触控元素比管理端更圆一点 —— */
+$xh-radius-xs: 4rpx;
+$xh-radius-sm: 8rpx;
+$xh-radius: 12rpx;
+$xh-radius-lg: 20rpx;
+
+/* —— 间距（rpx，750 设计稿） —— */
+$xh-1: 8rpx;
+$xh-2: 16rpx;
+$xh-3: 24rpx;
+$xh-4: 32rpx;
+$xh-5: 40rpx;
+$xh-6: 48rpx;
+$xh-8: 64rpx;
+$xh-10: 80rpx;
+
+/* —— 字号 —— */
+$xh-text-xs: 24rpx;
+$xh-text-sm: 26rpx;
+$xh-text-base: 28rpx;
+$xh-text-lg: 32rpx;
+$xh-text-xl: 38rpx;
+$xh-text-2xl: 46rpx;
+$xh-text-3xl: 56rpx;
+
+/* —— 预留的 uni-app 主题变量（供内置组件使用） —— */
+$uni-color-primary: $xh-teal-600;
+$uni-color-success: $xh-teal-500;
+$uni-color-warning: $xh-amber-700;
+$uni-color-error: $xh-cinnabar-600;
+$uni-text-color: $xh-ink-900;
+$uni-text-color-grey: $xh-ink-400;
+$uni-bg-color: $xh-paper;
+$uni-border-color: $xh-line;

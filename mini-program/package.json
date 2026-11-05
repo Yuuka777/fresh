@@ -1,0 +1,27 @@
+{
+  "name": "xianhe-fresh-miniapp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "鲜禾前置仓 · 用户端小程序（uni-app + Vue 3 + Vite，编译到微信小程序）",
+  "scripts": {
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "dev:h5": "uni",
+    "build:h5": "uni build"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "3.0.0-4080720251210001",
+    "@dcloudio/uni-components": "3.0.0-4080720251210001",
+    "@dcloudio/uni-h5": "3.0.0-4080720251210001",
+    "@dcloudio/uni-mp-weixin": "3.0.0-4080720251210001",
+    "pinia": "2.1.7",
+    "vue": "3.4.21"
+  },
+  "devDependencies": {
+    "@dcloudio/uni-cli-shared": "3.0.0-4080720251210001",
+    "@dcloudio/uni-h5-vite": "3.0.0-4080720251210001",
+    "@dcloudio/vite-plugin-uni": "3.0.0-4080720251210001",
+    "sass": "^1.77.8",
+    "vite": "5.2.8"
+  }
+}

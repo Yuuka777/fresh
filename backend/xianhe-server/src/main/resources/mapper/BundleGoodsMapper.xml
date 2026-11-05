@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.BundleGoodsMapper">
+
+    <!--
+      批量方法的前置条件：入参集合非空（判空在 Service 层，理由见 GoodsSpecMapper.xml）
+    -->
+
+    <!-- 前置条件：bundleGoods 非空 -->
+    <insert id="insertBatch">
+        INSERT INTO bundle_goods (bundle_id, goods_id, name, price, copies)
+        VALUES
+        <foreach collection="bundleGoods" item="item" separator=",">
+            (#{item.bundleId}, #{item.goodsId}, #{item.name}, #{item.price}, #{item.copies})
+        </foreach>
+    </insert>
+
+    <select id="listByBundleId" resultType="BundleGoods">
+        SELECT id, bundle_id, goods_id, name, price, copies
+        FROM bundle_goods
+        WHERE bundle_id = #{bundleId}
+        ORDER BY id ASC
+    </select>
+
+    <delete id="deleteByBundleId">
+        DELETE FROM bundle_goods
+        WHERE bundle_id = #{bundleId}
+    </delete>
+
+    <!-- 前置条件：bundleIds 非空 -->
+    <delete id="deleteByBundleIds">
+        DELETE FROM bundle_goods
+        WHERE bundle_id IN
+        <foreach collection="bundleIds" item="bundleId" open="(" separator="," close=")">
+            #{bundleId}
+        </foreach>
+    </delete>
+
+    <!-- 不看组合箱状态：只要被任何组合箱引用就不允许删除商品 -->
+    <!-- 前置条件：bundleIds 非空 -->
+    <select id="listByBundleIds" resultType="BundleGoods">
+        SELECT id, bundle_id, goods_id, name, price, copies
+        FROM bundle_goods
+        WHERE bundle_id IN
+        <foreach collection="bundleIds" item="bundleId" open="(" separator="," close=")">
+            #{bundleId}
+        </foreach>
+        ORDER BY id ASC
+    </select>
+
+    <select id="countByGoodsIds" resultType="int">
+        SELECT COUNT(*)
+        FROM bundle_goods
+        WHERE goods_id IN
+        <foreach collection="goodsIds" item="goodsId" open="(" separator="," close=")">
+            #{goodsId}
+        </foreach>
+    </select>
+
+    <!-- 只看起售中的组合箱（b.status = 1）：它们正在售卖，缺件会直接暴露给用户 -->
+    <select id="countOnSaleByGoodsIds" resultType="int">
+        SELECT COUNT(*)
+        FROM bundle_goods bg
+                 JOIN bundle b ON b.id = bg.bundle_id
+        WHERE b.status = 1
+          AND bg.goods_id IN
+        <foreach collection="goodsIds" item="goodsId" open="(" separator="," close=")">
+            #{goodsId}
+        </foreach>
+    </select>
+
+</mapper>

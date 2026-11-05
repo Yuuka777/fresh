@@ -1,0 +1,40 @@
+# ==================================================================
+# 开发环境配置模板
+#
+# 使用方式：把本文件复制为同目录下的 application-dev.yml，再按实际环境填入值。
+# application-dev.yml 已被 .gitignore 忽略，不会进入版本库。
+#
+#   cp application-dev.yml.example application-dev.yml
+# ==================================================================
+xianhe:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: xianhe_fresh
+    username: <数据库用户名>
+    password: <数据库密码>
+
+  redis:
+    host: localhost
+    port: 6379
+    password: <Redis 密码，无密码则删除本行>
+    # 与其它项目隔离，独占一个库编号
+    database: 11
+
+  jwt:
+    # 两个端使用不同密钥：一端令牌泄露不影响另一端。
+    # 生产环境应换成随机长字符串，不要使用示例值。
+    admin-secret-key: <管理端令牌密钥>
+    user-secret-key: <用户端令牌密钥>
+
+  alioss:
+    endpoint: <如 oss-cn-beijing.aliyuncs.com>
+    access-key-id: <AccessKeyId>
+    access-key-secret: <AccessKeySecret>
+    bucket-name: <存储空间名称>
+
+  wechat:
+    # 微信小程序凭证，仅后端使用；前端只上送 code
+    appid: <小程序 AppID>
+    secret: <小程序 AppSecret>

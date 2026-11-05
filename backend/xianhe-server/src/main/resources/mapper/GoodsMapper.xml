@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.GoodsMapper">
+
+    <sql id="columns">
+        id, name, category_id, price, image, description, status,
+        origin, shelf_life, storage_zone,
+        create_time, update_time, create_user, update_user
+    </sql>
+
+    <!--
+      分类删除前的关联校验，不过滤 status：下架商品同样占用该分类
+    -->
+    <select id="countByCategoryId" resultType="int">
+        SELECT COUNT(*)
+        FROM goods
+        WHERE category_id = #{categoryId}
+    </select>
+
+    <select id="getById" resultType="Goods">
+        SELECT
+        <include refid="columns"/>
+        FROM goods
+        WHERE id = #{id}
+    </select>
+
+    <!--
+      用 LEFT JOIN 而不是 INNER JOIN：万一分类被人为删掉，详情也要能返回商品本身
+    -->
+    <select id="getVoById" resultType="GoodsVO">
+        SELECT g.id,
+               g.name,
+               g.category_id,
+               c.name AS categoryName,
+               g.price,
+               g.image,
+               g.description,
+               g.status,
+               g.origin,
+               g.shelf_life,
+               g.storage_zone,
+               g.update_time
+        FROM goods g
+                 LEFT JOIN goods_category c ON c.id = g.category_id
+        WHERE g.id = #{id}
+    </select>
+
+    <!--
+      三个条件都可不传、AND 组合；不查 specs（规格仅详情返回）；按 update_time 倒序
+    -->
+    <select id="pageQuery" resultType="GoodsVO">
+        SELECT g.id,
+               g.name,
+               g.category_id,
+               c.name AS categoryName,
+               g.price,
+               g.image,
+               g.description,
+               g.status,
+               g.origin,
+               g.shelf_life,
+               g.storage_zone,
+               g.update_time
+        FROM goods g
+                 LEFT JOIN goods_category c ON c.id = g.category_id
+        <where>
+            <if test="name != null and name != ''">
+                AND g.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="categoryId != null">
+                AND g.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                AND g.status = #{status}
+            </if>
+        </where>
+        ORDER BY g.update_time DESC
+    </select>
+
+    <!-- 按分类查（categoryId 可为空），供组合箱的商品选择弹层使用 -->
+    <select id="listByCategoryId" resultType="Goods">
+        SELECT
+        <include refid="columns"/>
+        FROM goods
+        <where>
+            <if test="categoryId != null">
+                AND category_id = #{categoryId}
+            </if>
+        </where>
+        ORDER BY update_time DESC
+    </select>
+
+    <!-- 按 id 批量查：组合箱保存时回填名称/单价，删除前确认记录是否存在 -->
+    <select id="listByIds" resultType="Goods">
+        SELECT
+        <include refid="columns"/>
+        FROM goods
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- status = 1 即 StatusConstant.ENABLE（上架中），删除商品前的校验用 -->
+    <select id="countOnSaleByIds" resultType="int">
+        SELECT COUNT(*)
+        FROM goods
+        WHERE status = 1
+        AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO goods (name, category_id, price, image, description, status,
+                           origin, shelf_life, storage_zone,
+                           create_time, update_time, create_user, update_user)
+        VALUES (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{status},
+                #{origin}, #{shelfLife}, #{storageZone},
+                #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    </insert>
+
+    <!--
+      动态更新：空串表示清空（前端清空输入框或点「移除图片」提交的就是空串），
+      因此只判 != null、不判 != ''；不含 status
+    -->
+    <update id="update">
+        UPDATE goods
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="origin != null">origin = #{origin},</if>
+            <if test="shelfLife != null">shelf_life = #{shelfLife},</if>
+            <if test="storageZone != null">storage_zone = #{storageZone},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE goods
+        SET status      = #{status},
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByIds">
+        DELETE FROM goods
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 用户端：只看上架商品，按 id 升序（商品表无排序字段，取稳定顺序以免结果跳动） -->
+    <select id="listOnSaleByCategoryId" resultType="Goods">
+        SELECT
+        <include refid="columns"/>
+        FROM goods
+        WHERE status = 1
+          AND category_id = #{categoryId}
+        ORDER BY id ASC
+    </select>
+
+    <!-- 用户端搜索：只按名称模糊匹配，与分类无关 -->
+    <select id="searchOnSaleByName" resultType="Goods">
+        SELECT
+        <include refid="columns"/>
+        FROM goods
+        WHERE status = 1
+          AND name LIKE CONCAT('%', #{name}, '%')
+        ORDER BY id ASC
+    </select>
+
+    <!-- 工作台商品总览：上架 / 下架各有多少 -->
+    <select id="countByStatus" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM goods
+        WHERE status = #{status}
+    </select>
+
+</mapper>

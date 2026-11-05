@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>鲜禾</title>
+    <script>
+      var coverSupport =
+        'CSS' in window &&
+        typeof CSS.supports === 'function' &&
+        (CSS.supports('top: env(a)') || CSS.supports('top: constant(a)'))
+      document.write(
+        '<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no' +
+          (coverSupport ? ',viewport-fit=cover' : '') +
+          '" />'
+      )
+    </script>
+  </head>
+  <body>
+    <!-- uni-app H5 的入口是虚拟模块 /main，由它加载 src/main.js 并调用其中的
+         createApp() 完成挂载。直接写 /src/main.js 会导致「页面能加载、却永远空白」。
+         小程序端不走这个文件（用 app.json / app.js），故不受影响。 -->
+    <div id="app"><!--app-html--></div>
+    <script type="module" src="/main"></script>
+  </body>
+</html>

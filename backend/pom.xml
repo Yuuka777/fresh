@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.3</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.xianhe</groupId>
+    <artifactId>xianhe-fresh</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>xianhe-fresh</name>
+    <description>鲜禾前置仓 · 30 分钟达生鲜平台后端</description>
+
+    <modules>
+        <module>xianhe-common</module>
+        <module>xianhe-pojo</module>
+        <module>xianhe-server</module>
+    </modules>
+
+    <properties>
+        <!-- 编译与运行时均为 JDK 17（与 Spring Boot 2.7.3 官方支持范围一致） -->
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <mybatis.spring>2.2.0</mybatis.spring>
+        <!--
+          PageHelper 用 1.4.x 而不是参照项目的 1.3.0：
+          1.3.0 的 PageHelperAutoConfiguration 直接注入 List<SqlSessionFactory>，
+          与 SqlSessionFactory 需要的 PageInterceptor 形成 Bean 循环，
+          在 Spring Boot 2.6+ （默认禁止循环引用）下启动即失败。
+          1.4.3 起改用 ObjectProvider 打破该循环，因此无需打开
+          spring.main.allow-circular-references 这个全局放宽开关。
+        -->
+        <pagehelper>1.4.7</pagehelper>
+        <druid>1.2.1</druid>
+        <lombok>1.18.30</lombok>
+        <commons.lang3>3.12.0</commons.lang3>
+        <jjwt>0.9.1</jjwt>
+        <jaxb-api>2.3.1</jaxb-api>
+        <aspectj>1.9.7</aspectj>
+        <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
+        <knife4j>3.0.2</knife4j>
+        <redisson>3.17.7</redisson>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- 持久层：纯 MyBatis + PageHelper，不使用 MyBatis-Plus -->
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis.spring}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pagehelper}</version>
+            </dependency>
+
+            <!-- 连接池 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid}</version>
+            </dependency>
+
+            <!-- 分布式锁与缓存 -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson}</version>
+            </dependency>
+
+            <!-- 代码简化 -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons.lang3}</version>
+            </dependency>
+
+            <!-- JWT（JDK 9+ 需显式引入 JAXB） -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jjwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${jaxb-api}</version>
+            </dependency>
+
+            <!-- AOP：公共字段自动填充 -->
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjrt</artifactId>
+                <version>${aspectj}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>${aspectj}</version>
+            </dependency>
+
+            <!-- 对象存储 -->
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${aliyun.sdk.oss}</version>
+            </dependency>
+
+            <!-- 接口文档 -->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-spring-boot-starter</artifactId>
+                <version>${knife4j}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

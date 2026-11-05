@@ -1,0 +1,27 @@
+# 构建产物
+target/
+build/
+out/
+
+# 本地环境配置：含数据库口令、Redis 口令、对象存储与微信密钥，绝不入库
+src/main/resources/application-dev.yml
+src/main/resources/application-local.yml
+src/main/resources/application-prod.yml
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+
+# 日志与运行期文件
+logs/
+*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db

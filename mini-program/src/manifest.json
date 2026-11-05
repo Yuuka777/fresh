@@ -1,0 +1,39 @@
+{
+  "name": "鲜禾",
+  "appid": "",
+  "description": "社区生鲜前置仓 · 用户端小程序",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "vueVersion": "3",
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false,
+      "es6": true,
+      "enhance": true,
+      "postcss": true,
+      "minified": true
+    },
+    "usingComponents": true,
+    "lazyCodeLoading": "requiredComponents",
+    "permission": {}
+  },  "h5": {
+    "title": "鲜禾",
+    "router": { "mode": "hash", "base": "./" },
+    "devServer": {
+      "port": 5200,
+      "proxy": {
+        "/user": {
+          "target": "http://localhost:8080",
+          "changeOrigin": true
+        },
+        "/api": {
+          "target": "http://localhost:8080",
+          "changeOrigin": true,
+          "rewrite": "(path) => path.replace(/^\\/api/, '/admin')"
+        }
+      }
+    }
+  }
+}

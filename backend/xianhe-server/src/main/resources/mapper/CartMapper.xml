@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.CartMapper">
+
+    <!--
+      集合判空不放 XML：MyBatis 3.5.7 的 OGNL 在 JDK 17 下无法反射不可变集合的 size()，
+      会抛 InaccessibleObjectException（表现为「未知错误」）。判空一律在 Service 层
+    -->
+
+    <sql id="columns">
+        id, name, image, member_id, goods_id, bundle_id, spec_text, number, amount, create_time
+    </sql>
+
+    <!-- 按加入顺序（id 升序）：顺序稳定，加减时行不会跳动 -->
+    <select id="listByMemberId" resultType="Cart">
+        SELECT
+        <include refid="columns"/>
+        FROM cart
+        WHERE member_id = #{memberId}
+        ORDER BY id ASC
+    </select>
+
+    <!--
+      同款判定：会员 + 商品/组合箱 + 规格文本。
+      规格文本要显式区分 null 与有值 —— 若像参照工程那样「为 null 就跳过该条件」，
+      同一商品的无规格行会与有规格行互相合并，加减就串到别的规格上了。
+    -->
+    <select id="getBySameLine" resultType="Cart">
+        SELECT
+        <include refid="columns"/>
+        FROM cart
+        WHERE member_id = #{memberId}
+        <choose>
+            <when test="goodsId != null">
+                AND goods_id = #{goodsId} AND bundle_id IS NULL
+            </when>
+            <otherwise>
+                AND bundle_id = #{bundleId} AND goods_id IS NULL
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="specText != null">
+                AND spec_text = #{specText}
+            </when>
+            <otherwise>
+                AND spec_text IS NULL
+            </otherwise>
+        </choose>
+        LIMIT 1
+    </select>
+
+    <!-- create_time 由 Service 赋值；amount 存小计（单价 × 数量） -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cart (name, image, member_id, goods_id, bundle_id, spec_text, number, amount, create_time)
+        VALUES (#{name}, #{image}, #{memberId}, #{goodsId}, #{bundleId}, #{specText}, #{number}, #{amount}, #{createTime})
+    </insert>
+
+    <update id="updateNumberById">
+        UPDATE cart
+        SET number = #{number},
+            amount = #{amount}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM cart
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 用户端移除一行：带 member_id 条件，别人的行删不到（影响行数 0） -->
+    <delete id="deleteByIdAndMember">
+        DELETE FROM cart
+        WHERE id = #{id} AND member_id = #{memberId}
+    </delete>
+
+    <delete id="deleteByMemberId">
+        DELETE FROM cart
+        WHERE member_id = #{memberId}
+    </delete>
+
+    <!-- 按「引用者」删除：商品/组合箱删掉后，购物车里指向它的行留着只会在结算时报错 -->
+
+    <!-- 前置条件：goodsIds 非空 -->
+    <delete id="deleteByGoodsIds">
+        DELETE FROM cart
+        WHERE goods_id IN
+        <foreach collection="goodsIds" item="goodsId" open="(" separator="," close=")">
+            #{goodsId}
+        </foreach>
+    </delete>
+
+    <!-- 前置条件：bundleIds 非空 -->
+    <delete id="deleteByBundleIds">
+        DELETE FROM cart
+        WHERE bundle_id IN
+        <foreach collection="bundleIds" item="bundleId" open="(" separator="," close=")">
+            #{bundleId}
+        </foreach>
+    </delete>
+
+</mapper>

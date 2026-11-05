@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.GoodsCategoryMapper">
+
+    <sql id="columns">
+        id, type, name, sort, status, create_time, update_time
+    </sql>
+
+    <select id="getById" resultType="GoodsCategory">
+        SELECT
+        <include refid="columns"/>
+        FROM goods_category
+        WHERE id = #{id}
+    </select>
+
+    <!--
+      管理端分页：不加 status 条件（禁用中的分类也要能查到并恢复）；
+      type 只判 null 不判空串（OGNL 会把 0 当成「空」）；排序只用 sort
+    -->
+    <select id="pageQuery" resultType="GoodsCategory">
+        SELECT
+        <include refid="columns"/>
+        FROM goods_category
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+        </where>
+        ORDER BY sort ASC
+    </select>
+
+    <!-- 按类型查全量，供管理端表单下拉框使用；同样不过滤 status（契约 2.2.6） -->
+    <select id="listByType" resultType="GoodsCategory">
+        SELECT
+        <include refid="columns"/>
+        FROM goods_category
+        <where>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+        </where>
+        ORDER BY sort ASC
+    </select>
+
+    <!-- 用户端：只返回启用中的分类；type 只判 null 不判空串（理由同 pageQuery） -->
+    <select id="listEnabledByType" resultType="GoodsCategory">
+        SELECT
+        <include refid="columns"/>
+        FROM goods_category
+        <where>
+            status = 1
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+        </where>
+        ORDER BY sort ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO goods_category (type, name, sort, status,
+                                    create_time, update_time, create_user, update_user)
+        VALUES (#{type}, #{name}, #{sort}, #{status},
+                #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    </insert>
+
+    <!--
+      动态更新：只写非空字段；type 不提供更新（换类型等于换了一张表的语义）
+    -->
+    <update id="update">
+        UPDATE goods_category
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE goods_category
+        SET status      = #{status},
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM goods_category
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

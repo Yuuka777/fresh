@@ -1,0 +1,95 @@
+/* ============================================================
+   鲜禾前置仓 · 设计令牌（Design Tokens）
+   方向：冷链台账 —— 工业工具理性 + 纸质台账的秩序感
+   规则：主色一枚（深青绿）、强调色一枚（朱砂，仅用于待处理与危险）、
+        圆角克制、以细规则线替代阴影堆叠、数字一律等宽字体
+   ============================================================ */
+:root {
+  /* —— 墨色：文字与深色面（带绿的近黑，不是纯灰黑） —— */
+  --xh-ink-900: #0a1f19;
+  --xh-ink-800: #123028;
+  --xh-ink-700: #1d4237;
+  --xh-ink-500: #4c6459;
+  /* 弱化文字的取值受 WCAG AA 约束：这两个色值已按「纸面 #f4f6f2 上 ≥ 4.5:1」反解，
+     改动前请先跑 npm run test:contrast */
+  --xh-ink-400: #556a5f;
+  --xh-ink-300: #627469;
+
+  /* —— 纸面：米白的三种层次 —— */
+  --xh-paper: #f4f6f2;
+  --xh-paper-2: #eaece7;
+  --xh-surface: #ffffff;
+  --xh-surface-2: #fafbf8;
+
+  /* —— 主色：深青绿（生鲜 / 冷链 / 社区） —— */
+  --xh-teal-900: #04342c;
+  --xh-teal-800: #085041;
+  --xh-teal-600: #0f6e56;
+  --xh-teal-500: #1d9e75;
+  --xh-teal-200: #9fe1cb;
+  --xh-teal-50: #e1f5ee;
+
+  /* —— 强调与语义（克制使用） —— */
+  --xh-cinnabar-700: #8f2d1a;
+  --xh-cinnabar-600: #b23a22;
+  --xh-cinnabar-50: #fbede8;
+  --xh-amber-700: #85500f;
+  --xh-amber-600: #a9611a;
+  --xh-amber-50: #fbf0df;
+  --xh-blue-600: #1f4e79;
+  --xh-blue-50: #e9f0f7;
+
+  /* —— 规则线：台账的骨架 —— */
+  --xh-line: #dce4dd;
+  --xh-line-strong: #c3d0c7;
+  --xh-line-soft: #e8ede8;
+
+  /* —— 字体：展示字用宋（台账的印刷感），正文用黑，数字用等宽 —— */
+  --xh-font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+  --xh-font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+  --xh-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+  /* —— 字阶 —— */
+  --xh-text-xs: 12px;
+  --xh-text-sm: 13px;
+  --xh-text-base: 14px;
+  --xh-text-lg: 16px;
+  --xh-text-xl: 20px;
+  --xh-text-2xl: 28px;
+  --xh-text-3xl: 36px;
+
+  /* —— 间距：4 的倍数，不发明中间值 —— */
+  --xh-1: 4px;
+  --xh-2: 8px;
+  --xh-3: 12px;
+  --xh-4: 16px;
+  --xh-5: 20px;
+  --xh-6: 24px;
+  --xh-8: 32px;
+  --xh-10: 40px;
+  --xh-12: 48px;
+  --xh-16: 64px;
+
+  /* —— 圆角：小而克制 —— */
+  --xh-radius-xs: 2px;
+  --xh-radius-sm: 4px;
+  --xh-radius: 6px;
+  --xh-radius-lg: 10px;
+
+  /* —— 阴影三级：只在浮层使用，平面不堆阴影 —— */
+  --xh-shadow-1: 0 1px 2px rgba(10, 31, 25, 0.06);
+  --xh-shadow-2: 0 4px 12px rgba(10, 31, 25, 0.08);
+  --xh-shadow-3: 0 12px 32px rgba(10, 31, 25, 0.12);
+
+  /* —— 动效 —— */
+  --xh-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --xh-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --xh-dur-fast: 150ms;
+  --xh-dur: 300ms;
+  --xh-dur-slow: 600ms;
+
+  /* —— 布局尺寸 —— */
+  --xh-sidebar-w: 228px;
+  --xh-header-h: 60px;
+  --xh-z-drawer: 1000;
+}

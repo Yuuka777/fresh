@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.xianhe</groupId>
+        <artifactId>xianhe-fresh</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>xianhe-pojo</artifactId>
+    <name>xianhe-pojo</name>
+    <description>数据模型：entity（与数据库表一一对应）、dto（入参）、vo（出参）</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <!-- GET 查询里带 yyyy-MM-dd HH:mm:ss 的字段（如订单的时间区间）要靠 @DateTimeFormat 才能绑定 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+    </dependencies>
+</project>

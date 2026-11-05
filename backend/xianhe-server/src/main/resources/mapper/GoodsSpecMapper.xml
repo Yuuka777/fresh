@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.GoodsSpecMapper">
+
+    <!--
+      集合判空不放 XML：MyBatis 3.5.7 的 OGNL 在 JDK 17 下无法反射不可变集合的 size()，
+      会抛 InaccessibleObjectException（表现为「未知错误」）。判空一律在 Service 层
+    -->
+
+    <!-- 前置条件：specs 非空（Service 层已判定） -->
+    <insert id="insertBatch">
+        INSERT INTO goods_spec (goods_id, name, `value`)
+        VALUES
+        <foreach collection="specs" item="spec" separator=",">
+            (#{spec.goodsId}, #{spec.name}, #{spec.value})
+        </foreach>
+    </insert>
+
+    <!-- 按 id 升序 = 录入顺序，前端按此顺序渲染候选值 -->
+    <select id="listByGoodsId" resultType="GoodsSpec">
+        SELECT id, goods_id, name, `value`
+        FROM goods_spec
+        WHERE goods_id = #{goodsId}
+        ORDER BY id ASC
+    </select>
+
+    <delete id="deleteByGoodsId">
+        DELETE FROM goods_spec
+        WHERE goods_id = #{goodsId}
+    </delete>
+
+    <!-- 前置条件：goodsIds 非空（Service 层已判定，避免拼出非法的 IN ()） -->
+    <delete id="deleteByGoodsIds">
+        DELETE FROM goods_spec
+        WHERE goods_id IN
+        <foreach collection="goodsIds" item="goodsId" open="(" separator="," close=")">
+            #{goodsId}
+        </foreach>
+    </delete>
+
+    <!-- 前置条件：goodsIds 非空。用户端列表一次取全，避免逐个商品再查一次库 -->
+    <select id="listByGoodsIds" resultType="GoodsSpec">
+        SELECT id, goods_id, name, `value`
+        FROM goods_spec
+        WHERE goods_id IN
+        <foreach collection="goodsIds" item="goodsId" open="(" separator="," close=")">
+            #{goodsId}
+        </foreach>
+        ORDER BY id ASC
+    </select>
+
+</mapper>

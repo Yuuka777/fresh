@@ -1,0 +1,70 @@
+{
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^xh-(.*)": "@/components/xh-$1/xh-$1.vue"
+    }
+  },
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "鲜禾",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/search/result",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "搜索商品" }
+    },
+    {
+      "path": "pages/order/confirm",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "确认订单" }
+    },
+    {
+      "path": "pages/order/detail",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "订单详情" }
+    },
+    {
+      "path": "pages/order/pay",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "支付订单" }
+    },
+    {
+      "path": "pages/order/success",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "提交成功" }
+    },
+    {
+      "path": "pages/order/history",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "历史订单" }
+    },
+    {
+      "path": "pages/order/remark",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "订单备注" }
+    },
+    {
+      "path": "pages/address/list",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "收货地址" }
+    },
+    {
+      "path": "pages/address/edit",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "编辑地址" }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "我的" }
+    },
+    {
+      "path": "pages/error/network",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "网络异常" }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "鲜禾",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F4F6F2",
+    "backgroundColorTop": "#F4F6F2",
+    "backgroundColorBottom": "#F4F6F2"
+  }
+}

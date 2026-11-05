@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.MemberMapper">
+
+    <sql id="columns">
+        id, openid, name, phone, sex, avatar, create_time
+    </sql>
+
+    <!-- openid 上有唯一索引，最多命中一行 -->
+    <select id="getByOpenid" resultType="Member">
+        SELECT
+        <include refid="columns"/>
+        FROM member
+        WHERE openid = #{openid}
+    </select>
+
+    <select id="getById" resultType="Member">
+        SELECT
+        <include refid="columns"/>
+        FROM member
+        WHERE id = #{id}
+    </select>
+
+    <!-- create_time 由 Service 显式赋值：本表不记录操作人，不走 @AutoFill -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO member (openid, name, phone, sex, avatar, create_time)
+        VALUES (#{openid}, #{name}, #{phone}, #{sex}, #{avatar}, #{createTime})
+    </insert>
+
+    <!-- 会员统计用：按注册时间区间计数，两端都可为空 -->
+    <select id="countByCreateTimeBetween" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM member
+        <where>
+            <if test="begin != null">
+                AND create_time &gt;= #{begin}
+            </if>
+            <if test="end != null">
+                AND create_time &lt;= #{end}
+            </if>
+        </where>
+    </select>
+
+    <!-- 按天分组一次查回整段区间；区间内没有新增的日期由 Service 层补 0 -->
+    <select id="countGroupByDate" resultType="DailyStatVO">
+        SELECT DATE_FORMAT(create_time, '%Y-%m-%d') AS statDate, COUNT(id) AS `count`
+        FROM member
+        <where>
+            <if test="begin != null">
+                AND create_time &gt;= #{begin}
+            </if>
+            <if test="end != null">
+                AND create_time &lt;= #{end}
+            </if>
+        </where>
+        GROUP BY statDate
+        ORDER BY statDate
+    </select>
+
+</mapper>

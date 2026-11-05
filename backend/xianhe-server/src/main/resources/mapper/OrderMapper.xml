@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xianhe.mapper.OrderMapper">
+
+    <sql id="columns">
+        id, number, status, member_id, address_id, order_time, checkout_time,
+        pay_method, pay_status, amount, remark, phone, address, user_name, consignee,
+        cancel_reason, rejection_reason, cancel_time, estimated_delivery_time,
+        delivery_status, delivery_time, delivery_fee
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_main (number, status, member_id, address_id, order_time, checkout_time,
+                                pay_method, pay_status, amount, remark, phone, address,
+                                user_name, consignee, estimated_delivery_time, delivery_status,
+                                delivery_fee)
+        VALUES (#{number}, #{status}, #{memberId}, #{addressId}, #{orderTime}, #{checkoutTime},
+                #{payMethod}, #{payStatus}, #{amount}, #{remark}, #{phone}, #{address},
+                #{userName}, #{consignee}, #{estimatedDeliveryTime}, #{deliveryStatus},
+                #{deliveryFee})
+    </insert>
+
+    <select id="getByNumber" resultType="OrderMain">
+        SELECT
+        <include refid="columns"/>
+        FROM order_main
+        WHERE number = #{number}
+    </select>
+
+    <select id="getById" resultType="OrderMain">
+        SELECT
+        <include refid="columns"/>
+        FROM order_main
+        WHERE id = #{id}
+    </select>
+
+    <update id="update">
+        UPDATE order_main
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="payStatus != null">pay_status = #{payStatus},</if>
+            <if test="payMethod != null">pay_method = #{payMethod},</if>
+            <if test="checkoutTime != null">checkout_time = #{checkoutTime},</if>
+            <if test="cancelReason != null">cancel_reason = #{cancelReason},</if>
+            <if test="cancelTime != null">cancel_time = #{cancelTime},</if>
+            <if test="rejectionReason != null">rejection_reason = #{rejectionReason},</if>
+            <if test="deliveryTime != null">delivery_time = #{deliveryTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 分页查询：用户端固定按会员过滤；管理端的订单号 / 手机号 / 状态 / 时间区间都是可选条件 -->
+    <select id="pageQuery" resultType="OrderMain">
+        SELECT
+        <include refid="columns"/>
+        FROM order_main
+        <where>
+            <if test="memberId != null">
+                AND member_id = #{memberId}
+            </if>
+            <if test="number != null and number != ''">
+                AND number LIKE CONCAT('%', #{number}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                AND phone LIKE CONCAT('%', #{phone}, '%')
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="beginTime != null">
+                AND order_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND order_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY order_time DESC, id DESC
+    </select>
+
+    <!-- 条件更新：只有库里状态仍是 fromStatus 时才写入，返回影响行数（0 = 状态已被别人改掉） -->
+    <update id="updateByIdAndStatus">
+        UPDATE order_main
+        <set>
+            <if test="order.status != null">status = #{order.status},</if>
+            <if test="order.payStatus != null">pay_status = #{order.payStatus},</if>
+            <if test="order.payMethod != null">pay_method = #{order.payMethod},</if>
+            <if test="order.checkoutTime != null">checkout_time = #{order.checkoutTime},</if>
+            <if test="order.cancelReason != null">cancel_reason = #{order.cancelReason},</if>
+            <if test="order.cancelTime != null">cancel_time = #{order.cancelTime},</if>
+            <if test="order.rejectionReason != null">rejection_reason = #{order.rejectionReason},</if>
+            <if test="order.deliveryTime != null">delivery_time = #{order.deliveryTime},</if>
+        </set>
+        WHERE id = #{order.id}
+          AND status = #{fromStatus}
+    </update>
+
+    <!-- 超时收口：一条 SQL 批量取消。WHERE 带状态条件，与「用户此刻正在支付」天然互斥 -->
+    <update id="cancelExpired">
+        UPDATE order_main
+        SET status = #{toStatus},
+            cancel_reason = #{reason},
+            cancel_time = #{cancelTime}
+        WHERE status = #{fromStatus}
+          AND order_time &lt; #{deadline}
+    </update>
+
+    <!-- 角标统计：一次 GROUP BY 拿到全部数字（原来 4 次独立 count 可能读到不同快照） -->
+    <select id="countGroupByStatus" resultType="java.util.Map">
+        SELECT status, COUNT(*) AS cnt
+        FROM order_main
+        WHERE status IN
+        <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+        GROUP BY status
+    </select>
+
+    <!-- 工作台与报表的公共条件：时间区间、状态都可为空 -->
+    <sql id="statWhere">
+        <where>
+            <if test="begin != null">
+                AND order_time &gt;= #{begin}
+            </if>
+            <if test="end != null">
+                AND order_time &lt;= #{end}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </sql>
+
+    <!--
+      报表四条聚合的口径都是「某状态 + 时间区间」。
+      实测（24 万行、30 天区间）：优化器会挑单列的 idx_order_status，把该状态的全部订单
+      扫一遍再过滤时间，408ms；走 (status, order_time, amount) 覆盖索引只扫区间，61ms。
+      因此带 status 时显式提示索引：覆盖索引能同时完成过滤、求和，不用回表。
+      不带 status 的查询（全部订单按天）仍交给优化器走 idx_order_time。
+    -->
+    <select id="countByCondition" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM order_main
+        <if test="status != null">FORCE INDEX(idx_report)</if>
+        <include refid="statWhere"/>
+    </select>
+
+    <!-- 没有匹配记录时 SUM 返回 NULL，这里直接兜成 0，Service 层不必再判空 -->
+    <select id="sumAmountByCondition" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(amount), 0)
+        FROM order_main
+        <if test="status != null">FORCE INDEX(idx_report)</if>
+        <include refid="statWhere"/>
+    </select>
+
+    <!-- 按天分组一次查回整段区间；区间内没有订单的日期由 Service 层补 0 -->
+    <select id="countGroupByDate" resultType="DailyStatVO">
+        SELECT DATE_FORMAT(order_time, '%Y-%m-%d') AS statDate, COUNT(id) AS `count`
+        FROM order_main
+        <if test="status != null">FORCE INDEX(idx_report)</if>
+        <include refid="statWhere"/>
+        GROUP BY statDate
+        ORDER BY statDate
+    </select>
+
+    <select id="sumAmountGroupByDate" resultType="DailyStatVO">
+        SELECT DATE_FORMAT(order_time, '%Y-%m-%d') AS statDate, IFNULL(SUM(amount), 0) AS amount
+        FROM order_main
+        <if test="status != null">FORCE INDEX(idx_report)</if>
+        <include refid="statWhere"/>
+        GROUP BY statDate
+        ORDER BY statDate
+    </select>
+
+    <!-- 销量 TOP10：按已完成订单的明细聚合（契约 2.9.4） -->
+    <select id="listSalesTop10" resultType="com.xianhe.dto.GoodsSalesDTO">
+        SELECT oi.name AS name, SUM(oi.number) AS number
+        FROM order_item oi
+        INNER JOIN order_main om ON om.id = oi.order_id
+        WHERE om.status = 5
+        <if test="begin != null">
+            AND om.order_time &gt;= #{begin}
+        </if>
+        <if test="end != null">
+            AND om.order_time &lt;= #{end}
+        </if>
+        GROUP BY oi.name
+        ORDER BY SUM(oi.number) DESC
+        LIMIT 10
+    </select>
+
+</mapper>
